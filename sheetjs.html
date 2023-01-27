@@ -25,6 +25,8 @@
                 birthday: row.bio.birthday
             }));
 
+            console.log(rows);
+
             /* generate worksheet and workbook */
             const worksheet = XLSX.utils.json_to_sheet(rows);
             const workbook = XLSX.utils.book_new();
@@ -34,7 +36,7 @@
             XLSX.utils.sheet_add_aoa(worksheet, [["Name", "Birthday"]], { origin: "A1" });
 
             /* calculate column width */
-            const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
+            const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 100);
             worksheet["!cols"] = [{ wch: max_width }];
 
             /* create an XLSX file and try to save to Presidents.xlsx */

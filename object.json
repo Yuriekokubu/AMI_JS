@@ -2,7 +2,7 @@
     {
         "header": {
             "Meter Reading Unit": "GRST9800",
-            "Number of Read": "0006",
+            "Number of Read": "GRST9800",
             "Number of Actual Read": "0006",
             "Total consumption-kWh": "00000000000000000",
             "Total Demand-kW": "00000000000000000",
@@ -37,26 +37,48 @@
                 "Device Plate": "888005",
                 "Old key": "0708101557888005",
                 "Reserved": "    ",
-                "Register": {
-                    "Meter Reading Unit": "GRST9800",
-                    "PEA No.": "27710591  ",
-                    "Register Number": "018",
-                    "Internal ID for meter reading document": "00000000002322946281",
-                    "Register Category": "01",
-                    "Register Code": "118     ",
-                    "Previous meter reading": "000000000012584",
-                    "Current meter reading": "000000000012784",
-                    "Places before decimal point": "5",
-                    "Places after decimal point": "8",
-                    "Register unit of measure": "KVR",
-                    "Not relevant to billing": " ",
-                    "Register Factor": "0000010000",
-                    "Consumption of Demand": "0000000000",
-                    "Upper meter reading": "000000000000013",
-                    "Lower meter reading": "000000000000012",
-                    "Note from meter reading": "    ",
-                    "Installation type": "  "
-                }
+                "Register": [
+                    {
+                        "Meter Reading Unit": "GRST9800",
+                        "PEA No.": "27710591  ",
+                        "Register Number": "018",
+                        "Internal ID for meter reading document": "00000000002322946281",
+                        "Register Category": "01",
+                        "Register Code": "118     ",
+                        "Previous meter reading": "000000000012584",
+                        "Current meter reading": "000000000012784",
+                        "Places before decimal point": "5",
+                        "Places after decimal point": "8",
+                        "Register unit of measure": "KVR",
+                        "Not relevant to billing": " ",
+                        "Register Factor": "0000010000",
+                        "Consumption of Demand": "0000000000",
+                        "Upper meter reading": "000000000000013",
+                        "Lower meter reading": "000000000000012",
+                        "Note from meter reading": "    ",
+                        "Installation type": "  "
+                    },
+                    {
+                        "Meter Reading Unit": "GRST9800",
+                        "PEA No.": "27710591  ",
+                        "Register Number": "018",
+                        "Internal ID for meter reading document": "00000000002322946281",
+                        "Register Category": "01",
+                        "Register Code": "118     ",
+                        "Previous meter reading": "000000000012584",
+                        "Current meter reading": "000000000012784",
+                        "Places before decimal point": "5",
+                        "Places after decimal point": "8",
+                        "Register unit of measure": "KVR",
+                        "Not relevant to billing": " ",
+                        "Register Factor": "0000010000",
+                        "Consumption of Demand": "0000000000",
+                        "Upper meter reading": "000000000000013",
+                        "Lower meter reading": "000000000000012",
+                        "Note from meter reading": "    ",
+                        "Installation type": "  "
+                    }
+                ]
             },
             {
                 "Meter Reading Unit": "GRST9800",
