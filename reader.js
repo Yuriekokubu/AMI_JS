@@ -11,8 +11,9 @@ const upload = async (event, cb) => {
     }
     let files = Array.from(event).map((file, i) => {
 
-        filename.push(file.name);
-        filename > 1 ? filename.join('') : filename[0];
+        if (filename.length === 2) {
+            filename.push(file.name);
+        }
 
         textDrop.innerHTML = filename;
         // Define a new file reader
