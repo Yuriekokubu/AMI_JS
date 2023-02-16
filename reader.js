@@ -11,9 +11,7 @@ const upload = async (event, cb) => {
     }
     let files = Array.from(event).map((file, i) => {
 
-        if (filename.length === 2) {
-            filename.push(file.name);
-        }
+        filename.push(file.name);
 
         textDrop.innerHTML = filename;
         // Define a new file reader
@@ -244,7 +242,7 @@ const callback = (e) => {
             for (const elem of element) {
                 if (elem.length === 15 && !/^0/.test(elem)) {
                     alert('ไฟล์ไม่ตรง');
-                } 
+                }
             }
         });
     });
