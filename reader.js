@@ -253,7 +253,6 @@ const callback = (e) => {
 
     count === 2 && Array.from(arr, (e, i) => {
         let result = i === 0 ? _.isEqual(arr[i], arr[i + 1]) : _.isEqual(arr[i * 2], arr[(i * 2) + 1]);
-        console.log(result);
     });
     count === 2 && app.append(gridElement);
 
