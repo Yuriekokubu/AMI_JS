@@ -243,6 +243,9 @@ const callback = (e) => {
             for (const elem of element) {
                 if (elem.length === 15 && !/^0/.test(elem)) {
                     alert('ไฟล์ไม่ตรง');
+                } else {
+                    alert('ไฟล์ถูกต้อง');
+
                 }
             }
         });
