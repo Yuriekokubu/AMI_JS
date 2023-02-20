@@ -1,7 +1,6 @@
-// import { hello } from './module.js';
+// import hello from './module';
 const textDrop = document.getElementById('text-drop');
 let filename = [];
-
 
 const upload = async (event, cb) => {
     // Convert the FileList into an array and iterate
@@ -109,7 +108,7 @@ const upload = async (event, cb) => {
                             customer = {
                                 "Meter Reading Unit": item[1],
                                 "PEA No.": item[2],
-                                "Contract Account": item[3],
+                                "Contract_Account": item[3],
                                 "Meter Type": item[4],
                                 "Manufacturer + Model": item[5],
                                 "Multiply Factor": item[6],
@@ -157,7 +156,7 @@ const upload = async (event, cb) => {
             };
 
             // Read the file as a text
-            reader.readAsText(file, "UTF-8");
+            reader.readAsText(file, "TIS-620");
         });
 
     });
@@ -219,6 +218,8 @@ const callback = (e) => {
     count++;
     obj_To_XLS = e;
 
+    console.log(obj_To_XLS);
+
     const app = document.getElementById('app');
     const gridElement = document.createElement('div');
     const grid = canvasDatagrid({
@@ -230,14 +231,14 @@ const callback = (e) => {
 
     let arr_obj = {};
 
-    Array.from(data_to_export).map(({ Register }) => {
+    Array.from(data_to_export).map(({ Contract_Account, Register }) => {
         //Register L:18
         Register.forEach((element, index) => {
             //['R', 'GRST9800', '27710591  ', '013', '00000000002322946276', '01', '015     ', '000000000012384'] L:19
             if (element[2]) arr_obj["PEA No."] = element[2];
-            if (element[7]) arr_obj[`${element[6]}Previous meter reading`] = element[7];
-            if (element[8]) arr_obj[`${element[6]}Current meter reading`] = element[8];
-            index === 17 && arr.push({ ...arr_obj });
+            if (element[7]) arr_obj[`${element[6]}`] = element[7];
+            if (element[8]) arr_obj[`${element[6]}`] = element[8];
+            index === 17 && arr.push({ Contract_Account, ...arr_obj });
 
             for (const elem of element) {
                 if (elem.length === 15 && !/^0/.test(elem)) {
@@ -250,6 +251,10 @@ const callback = (e) => {
     if (arr) {
         arr.sort((a, b) => a["PEA No."] - b["PEA No."]);
     }
+
+    console.log(arr);
+
+    sessionStorage.setItem('register', JSON.stringify(arr));
 
     count === 2 && Array.from(arr, (e, i) => {
         let result = i === 0 ? _.isEqual(arr[i], arr[i + 1]) : _.isEqual(arr[i * 2], arr[(i * 2) + 1]);
@@ -316,3 +321,8 @@ dropzone.addEventListener('drop', function (e) {
 const clearButton = document.getElementById('clear');
 
 clearButton.addEventListener('click', () => window.location.reload());
+
+const obj1 = { "a": 1, "b": ["1"], c: {} };
+const obj2 = { "a": 1, "b": ["1"], c: {} };
+
+console.log(_.isEqual(obj1, obj2)); // true

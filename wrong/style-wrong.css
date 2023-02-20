@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Kodchasan&display=swap');
+
+* {
+    font-family: 'Kodchasan', sans-serif;
+    color: rgb(63, 63, 63);
+}
+
+.text-header {
+    text-align: center;
+    margin-top: 2em;
+}
+
+.div-customer {
+    margin: 4em;
+}
+
+.div-reports {
+    margin: 4em;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    background: rgb(150, 150, 150);
+}
+
+table,
+th,
+td {
+    border: 2px solid rgb(22, 22, 22);
+    border-collapse: collapse;
+    padding: 1em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+th {
+    font-weight: 900;
+}
+
+table tr td:nth-child(2),
+table tr td:nth-child(5) {
+    text-align: left;
+}
+
+table tr td:nth-child(3),
+table tr td:nth-child(6) {
+    text-align: right;
+}

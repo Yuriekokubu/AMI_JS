@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kodchasan&family=Poppins&display=swap');
+
 
 * {
     margin: 0;
@@ -76,4 +77,25 @@ h1 {
     display: inline-block;
     transform: scale(.98);
     cursor: pointer;
+}
+
+.btn .wrong {
+    background-color: rgb(251, 93, 93);
+    text-decoration: none;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:active {
+    text-decoration: none;
 }

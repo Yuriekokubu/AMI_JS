@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../wrong/style-wrong.css">
+    <title>รีจิสเตอร์ผิดพลาด</title>
+</head>
+
+<body>
+    <div class="text-header">
+        <h1><u>แจ้งรีจิสเตอร์มีความผิดปกติ</u></h1>
+    </div>
+    <div class="div-customer">
+        <h3>ชื่อผู้ใช้ไฟฟ้า : <span id="ca"></span></h3>
+        <h3>มิเตอร์ PEA No. : <span id="pea"></span></h3>
+        <h3>ผิดปกติ : <span id="wrong"></span></h3>
+    </div>
+
+    <div class="div-reports">
+        <table>
+            <tr>
+                <th>รหัส</th>
+                <th>ความหมาย</th>
+                <th>ค่าที่อ่านได้</th>
+                <th>รหัส</th>
+                <th>ความหมาย</th>
+                <th>ค่าที่อ่านได้</th>
+            </tr>
+            <tr>
+                <td>888</td>
+                <td>ตรวจสอบ LCD</td>
+                <td id="888"></td>
+                <td>050</td>
+                <td>กิโลวัตต์สูงสุด Rate A Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="050"></td>
+            </tr>
+            <tr>
+                <td>090</td>
+                <td>วัน เดือน ปี ปัจจุบัน</td>
+                <td id="090"></td>
+                <td>060</td>
+                <td>กิโลวัตต์สูงสุด Rate B Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="060"></td>
+            </tr>
+            <tr>
+                <td>091</td>
+                <td>เวลาปัจจุบัน</td>
+                <td id="091"></td>
+                <td>070</td>
+                <td>กิโลวัตต์สูงสุด Rate C Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="070"></td>
+            </tr>
+            <tr>
+                <td>095</td>
+                <td>วัน เดือน ปี และเวลา ที่ Reset ครั้งสุดท้าย</td>
+                <td id="095"></td>
+                <td>015</td>
+                <td>กิโลวัตต์สะสม Rate A ปัจจุบัน (Imp)</td>
+                <td id="015"></td>
+            </tr>
+            <tr>
+                <td>096</td>
+                <td>จำนวนครั้งที่ Reset</td>
+                <td id="096"></td>
+                <td>016</td>
+                <td>กิโลวัตต์สะสม Rate B ปัจจุบัน (Imp)</td>
+                <td id="016"></td>
+            </tr>
+            <tr>
+                <td>111</td>
+                <td>กิโลวัตต์ ชั่วโมง รวม Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="111"></td>
+                <td>017</td>
+                <td>กิโลวัตต์สะสม Rate C ปัจจุบัน (Imp)</td>
+                <td id="017"></td>
+            </tr>
+            <tr>
+                <td>010</td>
+                <td>กิโลวัตต์ ชั่วโมง Rate A Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="010"></td>
+                <td>222</td>
+                <td>กิโลวาร์ ชั่วโมง รวม Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="222"></td>
+            </tr>
+            <tr>
+                <td>020</td>
+                <td>กิโลวัตต์ ชั่วโมง Rate B Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="020"></td>
+                <td>280</td>
+                <td>กิโลวาร์สูงสุด Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="280"></td>
+            </tr>
+            <tr>
+                <td>030</td>
+                <td>กิโลวัตต์ ชั่วโมง Rate C Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="030"></td>
+                <td>118</td>
+                <td>กิโลวาร์สะสม Reset ครั้งสุดท้าย (Imp)</td>
+                <td id="118"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script async src="./wrong.js"></script>
+
+</html>
