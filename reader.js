@@ -274,7 +274,7 @@ const callback = (e) => {
                     delete o2[o][v];
                 });
                 let isMatch = _.isEqual(o1[o], o2[i]);
-                isMatch === false && arrMisMatch.push({ "customer": o1[o] }, { "customer": o2[i] });
+                isMatch === false && arrMisMatch.push({ "customer": o2[i] });
             });
             arrMisMatch.length !== 0 && arrMisMatch.map((v) => createNewNode(v));
         }
