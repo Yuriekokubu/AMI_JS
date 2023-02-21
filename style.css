@@ -99,3 +99,12 @@ a:hover {
 a:active {
     text-decoration: none;
 }
+
+.missMatch {
+    margin: 1em;
+}
+
+a {
+    float: left;
+    clear: left
+}

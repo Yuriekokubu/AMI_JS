@@ -8,8 +8,12 @@ const upload = async (event, cb) => {
         alert('Maximum files input by 2');
         return;
     }
-    let files = Array.from(event).map((file, i) => {
 
+    let arrFile = [].slice.call(event);
+
+    let fileSorted = arrFile.sort((a, b) => a.name - b.name);
+
+    let files = Array.from(fileSorted).map((file, i) => {
         filename.push(file.name);
 
         textDrop.innerHTML = filename;
@@ -67,7 +71,6 @@ const upload = async (event, cb) => {
                     return Arr_sorted;
                 });
 
-                let ObjHeader = {};
                 let ArrObj = [];
                 let customerArray = [];
                 let customer;
@@ -213,38 +216,86 @@ let data_to_export;
 let result;
 let arr = [];
 let count = 0;
+let objH = [];
+let objC = [];
+let arrMisMatch = [];
 
 const callback = (e) => {
     count++;
     obj_To_XLS = e;
 
-    console.log(obj_To_XLS);
+
+    // HEADER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    let obHead = obj_To_XLS.map((o) => o.header);
+    objH.push({ ...obHead });
+
+    const arrObjH = Object.values(objH);
+
+    if (count == 2) {
+        const o1 = arrObjH[0];
+        const o2 = arrObjH[1];
+
+        if (o1.length === o2.length) {
+            Object.keys(o1).map((o, i) => {
+                delete o1[o]["Number of Actual Read"];
+                delete o2[o]["Number of Actual Read"];
+
+                let isMatch = _.isEqual(o1[o], o2[i]);
+                isMatch === false && arrMisMatch.push({ "header": o2[i] });
+
+            });
+            arrMisMatch.length !== 0 && arrMisMatch.map((v) => createNewNode(v));
+        }
+    }
+
 
     const app = document.getElementById('app');
     const gridElement = document.createElement('div');
     const grid = canvasDatagrid({
         parentNode: gridElement
     });
-    let objcus = obj_To_XLS.map((o) => o.customer);
 
+    // CUSTOMER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    let objcus = obj_To_XLS.map((o) => o.customer);
     data_to_export = objcus.flat();
+    const newArray = data_to_export.map(({ Register, ...keepAttrs }) => keepAttrs);
+    objC.push({ ...newArray });
+
+    const arrObjC = Object.values(objC);
+
+    if (count == 2) {
+        const o1 = arrObjC[0];
+        const o2 = arrObjC[1];
+
+        if (o1.length === o2.length) {
+            Object.keys(o1).map((o, i) => {
+                ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"].map((v) => {
+                    delete o1[o][v];
+                    delete o2[o][v];
+                });
+                let isMatch = _.isEqual(o1[o], o2[i]);
+                isMatch === false && arrMisMatch.push({ "customer": o1[o] }, { "customer": o2[i] });
+            });
+            arrMisMatch.length !== 0 && arrMisMatch.map((v) => createNewNode(v));
+        }
+    }
+
 
     let arr_obj = {};
-
     Array.from(data_to_export).map(({ Contract_Account, Register }) => {
         //Register L:18
         Register.forEach((element, index) => {
             //['R', 'GRST9800', '27710591  ', '013', '00000000002322946276', '01', '015     ', '000000000012384'] L:19
             if (element[2]) arr_obj["PEA No."] = element[2];
-            if (element[7]) arr_obj[`${element[6]}`] = element[7];
-            if (element[8]) arr_obj[`${element[6]}`] = element[8];
+            if (element[7]) arr_obj[element[6]] = element[7];
+            if (element[8]) arr_obj[element[6]] = element[8];
             index === 17 && arr.push({ Contract_Account, ...arr_obj });
 
-            for (const elem of element) {
-                if (elem.length === 15 && !/^0/.test(elem)) {
-                    alert('ไฟล์ไม่ตรง');
-                }
-            }
+            // for (const elem of element) {
+            //     if (elem.length === 15 && !/^0/.test(elem)) {
+            //         alert('ไฟล์ไม่ตรง');
+            //     }
+            // }
         });
     });
 
@@ -252,13 +303,12 @@ const callback = (e) => {
         arr.sort((a, b) => a["PEA No."] - b["PEA No."]);
     }
 
-    console.log(arr);
 
     sessionStorage.setItem('register', JSON.stringify(arr));
 
-    count === 2 && Array.from(arr, (e, i) => {
-        let result = i === 0 ? _.isEqual(arr[i], arr[i + 1]) : _.isEqual(arr[i * 2], arr[(i * 2) + 1]);
-    });
+    // count === 2 && Array.from(arr, (e, i) => {
+    //     let result = i === 0 ? _.isEqual(arr[i], arr[i + 1]) : _.isEqual(arr[i * 2], arr[(i * 2) + 1]);
+    // });
     count === 2 && app.append(gridElement);
 
     grid.addEventListener('rendercell', (e) => {
@@ -322,7 +372,34 @@ const clearButton = document.getElementById('clear');
 
 clearButton.addEventListener('click', () => window.location.reload());
 
-const obj1 = { "a": 1, "b": ["1"], c: {} };
-const obj2 = { "a": 1, "b": ["1"], c: {} };
 
-console.log(_.isEqual(obj1, obj2)); // true
+{/* <a href="javascript:void (window.open('http://127.0.0.1:5500/wrong/reports.html?ca=020001086447&pea=27710587  ','_blank'))">ดูข้อมูลไฟล์ผิดพลาด</a> */ }
+
+function createNewNode(item) {
+
+    const type_name = Object.keys(item)[0];
+    const value = Object.values(item)[0];
+
+    var json = JSON.stringify(value);
+    const blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+
+    if (type_name === "header") {
+        const node = document.createElement('a');
+        // node.href = `javascript:void (window.open("${window.location.origin}/wrong/reports.html?ca=020001086447&pea=27710587",'_blank'))`;
+        // node.href = `javascript:void (window.open("${window.location.origin}/wrong/header.html?header=${value["Meter Reading Unit"]}",'_blank'))`;
+        node.href = url;
+        node.setAttribute('target', '_blank');
+        const textNode = document.createTextNode(`<<<สายจดผิดพลาด ${value["Meter Reading Unit"]}>>>  `);
+        node.appendChild(textNode);
+        document.getElementById('missMatch').appendChild(node);
+    }
+    if (type_name === "customer") {
+        const node = document.createElement('a');
+        node.href = url;
+        node.setAttribute('target', '_blank');
+        const textNode = document.createTextNode(`<<<ข้อมูลผู้ใช้ไฟผิดพลาด ${value["Contract_Account"]}>>>  `);
+        node.appendChild(textNode);
+        document.getElementById('missMatch').appendChild(node);
+    }
+}

@@ -14,13 +14,19 @@ PEA.appendChild(PEA_Text);
 
 const result = JSON.parse(sessionStorage.getItem('register'));
 
-const ca_filter = result.filter((o) => o.Contract_Account == customerParams);
+console.log(result);
 
-const final = ca_filter[0];
+// const ca_filter = result.filter((o) => o.Contract_Account == customerParams);
 
-console.log(final);
+const ca_filter = result.filter(function (item) {
+    if (item.Contract_Account == customerParams) {
+        return true;
+    }
 
-for (var [key, val] of Object.entries(final)) {
+});
+
+
+for (var [key, val] of Object.entries(ca_filter[1])) {
     let formatedKey = key.slice(0, 3);
     let formatNum = parseInt(val, 10);
     var numb = formatedKey.trim();
@@ -29,9 +35,9 @@ for (var [key, val] of Object.entries(final)) {
     function date_090(value) {
         let val = value.slice(6, 12);
         let valSplit = val.split("");
-        valSplit.splice(2,0,"/")
-        valSplit.splice(5,0,"/")
-        let join =  valSplit.join("")
+        valSplit.splice(2, 0, "/");
+        valSplit.splice(5, 0, "/");
+        let join = valSplit.join("");
         return join;
     }
 
