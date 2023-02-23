@@ -286,9 +286,10 @@ const callback = (e) => {
         //Register L:18
         Register.forEach((element, index) => {
             //['R', 'GRST9800', '27710591  ', '013', '00000000002322946276', '01', '015     ', '000000000012384'] L:19
+            console.log(element[6]);
             if (element[2]) arr_obj["PEA No."] = element[2];
-            if (element[7]) arr_obj[element[6]] = element[7];
-            if (element[8]) arr_obj[element[6]] = element[8];
+            if (element[7]) arr_obj[`${element[6]}`] = element[7];
+            if (element[8]) arr_obj[`${element[6]}`] = element[8];
             index === 17 && arr.push({ Contract_Account, ...arr_obj });
 
             // for (const elem of element) {
