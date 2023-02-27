@@ -54,6 +54,7 @@ h1 {
 .btn {
     font-family: 'Poppins', sans-serif;
     margin-bottom: 10px;
+    margin-right: 10px;
     position: relative;
     display: inline-block;
     padding: 10px 30px;
@@ -107,4 +108,12 @@ a:active {
 a {
     float: left;
     clear: left
+}
+
+.wrapper {
+    margin-bottom: 1em;
+}
+
+.btn .excel_btn{
+    background-color: rgb(88, 156, 88) !important;
 }
