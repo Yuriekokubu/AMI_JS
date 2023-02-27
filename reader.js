@@ -411,7 +411,7 @@ function createNewNode(item) {
 
 function grid_report(data_report) {
     return new Grid({
-        columns: [{ id: "Contract_Account", name: "Contract Account", formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/reports.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No." }],
+        columns: [{ id: "Contract_Account", name: "Contract Account", formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/reports.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No." }],
         search: true,
         pagination: { limit: 10 },
         data: data_report,
