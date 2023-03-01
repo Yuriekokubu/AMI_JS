@@ -8,6 +8,9 @@ let filename = [];
 let count = 0;
 
 const upload = async (event, cb) => {
+    if (localStorage.getItem('key')) {
+        localStorage.removeItem("register");
+    }
     // Convert the FileList into an array and iterate
     if (event.length > 2) {
         alert('Maximum files input by 2');
@@ -32,7 +35,7 @@ const upload = async (event, cb) => {
             reader.onload = () => {
                 let data = reader.result;
                 let newArray = data.split(/\r?\n/);
-                resolve(newArray);
+                // resolve(newArray);
 
                 // document.getElementById('output')
                 //     .textContent = fr.result;
@@ -43,8 +46,11 @@ const upload = async (event, cb) => {
                 //Find Head Index
                 for (let [index, elem] of newArray.entries()) {
                     let firstChar = elem.charAt(0);
-                    if (elem.length == 72 || 84 && firstChar === "H") ArrayIndex.push(index);
+                    if (elem.length === 72 || 84 && firstChar === "H") {
+                        ArrayIndex.push(index);
+                    }
                 }
+
                 // elem.length == 72 || 84 
                 let sliced;
                 let MergeArray = [];
@@ -231,18 +237,27 @@ const callback = (e) => {
     objH.push({ ...obHead });
     const arrObjH = Object.values(objH);
 
-
     if (count == 2) {
-        const o1 = arrObjH[0];
-        const o2 = arrObjH[1];
+        const o1_mapH = arrObjH[0];
+        const o2_mapH = arrObjH[1];
 
-        if (o1.length === o2.length) {
-            Object.keys(o1).map((o, i) => {
-                delete o1[o]["Number of Actual Read"];
-                delete o2[o]["Number of Actual Read"];
+        let map1H = Object.values(o1_mapH).map((o) => o);
+        let map2H = Object.values(o2_mapH).map((o) => o);
 
-                let isMatch = _.isEqual(o1[o], o2[i]);
-                isMatch === false && arrMisMatch.push({ "header": o2[i] });
+        if (map1H.length === map2H.length) {
+            let o1H = map1H.map(({ ["Number of Actual Read"]: numAcRead, ...o }) => o);
+            let o2H = map2H.map(({ ["Number of Actual Read"]: numAcRead, ...o }) => o);
+
+            Object.keys(o1H).map((o, i) => {
+                let numeric = new RegExp(/^\d+$/).test(map2H[o]["Number of Actual Read"]);
+                if (numeric) {
+                    let isMatch = _.isEqual(o1H[o], o2H[i]);
+                    if (!isMatch) {
+                        arrMisMatch.push({ "header": map2H[i] });
+                    }
+                } else {
+                    arrMisMatch.push({ "header": map2H[i] });
+                }
             });
         }
         arrMisMatch.length !== 0 && arrMisMatch.map((v) => createNewNode(v));
@@ -255,20 +270,26 @@ const callback = (e) => {
     objC.push({ ...newArray });
 
     const arrObjC = Object.values(objC);
-
     if (count == 2) {
-        const o1 = arrObjC[0];
-        const o2 = arrObjC[1];
+        const o1_map = arrObjC[0];
+        const o2_map = arrObjC[1];
 
+        let map1 = Object.values(o1_map).map((o) => o);
+        let map2 = Object.values(o2_map).map((o) => o);
 
-        if (o1.length === o2.length) {
+        if (o1_map.length === o2_map.length) {
+            // const o1 = map1.map(({ ["Reading Code"]: rc, ["Actual meter reading date"]: ard, ["Actual upload date"]: aud, ["Incorrect time (min)"]: ict, ...o }) => o);
+            // const o2 = map2.map(({ ["Reading Code"]: rc, ["Actual meter reading date"]: ard, ["Actual upload date"]: aud, ["Incorrect time (min)"]: ict, ...o }) => o);
+
+            const o1 = Object.values(map1).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"]));
+            const o2 = Object.values(map2).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"]));
+
+            // console.log(map1);
+            // console.log(map2);
+
             Object.keys(o1).map((o, i) => {
-                ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"].map((v) => {
-                    delete o1[o][v];
-                    delete o2[o][v];
-                });
                 let isMatch = _.isEqual(o1[o], o2[i]);
-                isMatch === false && arrMisMatch.push({ "customer": o1[o] });
+                isMatch === false && arrMisMatch.push({ "customer": map2[o] });
             });
         }
     }
@@ -279,8 +300,8 @@ const callback = (e) => {
         Register.forEach((element, index) => {
             //['R', 'GRST9800', '27710591  ', '013', '00000000002322946276', '01', '015     ', '000000000012384'] L:19
             if (element[2]) arr_obj["PEA_No"] = element[2].trim();
-            if (element[7]) arr_obj[element[6].trim()] = element[7];
-            if (element[8]) arr_obj[element[6].trim()] = element[8];
+            if (element[7]) arr_obj[`${element[6]}`] = element[7];
+            if (element[8]) arr_obj[`${element[6]}`] = element[8];
             index === 17 && arr.push({ Contract_Account, ...arr_obj });
         });
     });
@@ -289,7 +310,6 @@ const callback = (e) => {
         arr.sort((a, b) => a["PEA_No"] - b["PEA_No"]);
     }
 
-
     localStorage.setItem('register', JSON.stringify(arr));
 
     const app = document.getElementById('app');
@@ -297,6 +317,7 @@ const callback = (e) => {
     const grid = canvasDatagrid({
         parentNode: gridElement
     });
+
     count === 2 && app.append(gridElement);
 
     grid.addEventListener('rendercell', (e) => {
@@ -312,11 +333,9 @@ const callback = (e) => {
     grid.style.height = '100vh';
     grid.data = arr;
 
-    let miss_sorted = arrMisMatch.filter(({ customer }) => customer);
-
-    let customer = miss_sorted.map(({ customer }) => customer);
-
-    count === 2 && arrMisMatch.length > 0 && grid_report(customer);
+    let miss_sorted = arrMisMatch.filter(({ customer }) => customer).map(({ customer }) => customer);
+    count === 2 && arrMisMatch.length > 0 && grid_report(miss_sorted);
+    console.log(miss_sorted)
 };
 
 const exportEXCEL = () => {
@@ -326,6 +345,67 @@ const exportEXCEL = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'a');
     XLSX.writeFile(workbook, "test.xlsx", { compression: true });
 };
+
+{/* <a href="javascript:void (window.open('http://127.0.0.1:5500/wrong/reports.html?ca=020001086447&pea=27710587  ','_blank'))">ดูข้อมูลไฟล์ผิดพลาด</a> */ }
+
+function createNewNode(item) {
+    const type_name = Object.keys(item)[0];
+    const value = Object.values(item)[0];
+
+    let string_html = [];
+
+    for (const [key, val] of Object.entries(value)) {
+        string_html.push(`<p> <b>${key}</b> : ${val}</p>`);
+    }
+
+
+    let html = `
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${type_name}</title>
+        </head>
+        <body>
+        ${string_html.map((v) => v).join(" ")}
+        <hr />
+        </body >
+      </html>
+        `;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+
+
+    if (type_name === "header") {
+        const node = document.createElement('a');
+        // node.href = `javascript: void (window.open("${window.location.origin}/wrong/reports.html?ca=020001086447&pea=27710587", '_blank'))`;
+        // node.href = `javascript: void (window.open("${window.location.origin}/wrong/header.html?header=${value["Meter Reading Unit"]}", '_blank'))`;
+        node.href = url;
+        node.setAttribute('target', '_blank');
+        const textNode = document.createTextNode(`<<<สายจดผิดพลาด ${value["Meter Reading Unit"]}>>>`);
+        node.appendChild(textNode);
+        document.getElementById('missMatch').appendChild(node);
+    }
+}
+
+function grid_report(data_report) {
+    return new Grid({
+        columns: [{ id: "Contract_Account", name: "Contract Account (ข้อมูลผู้ใช้ผิด)", formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/reports.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No.", width: '25%' }, { name: "สาเหตุผิดพลาด", width: '25%' }],
+        search: true,
+        pagination: { limit: 10 },
+        data: data_report,
+        sort: true
+    }).render(document.getElementById("wrapper"));
+}
+
+
+function findDiff(str1, str2) {
+    let diff = "";
+    str2.split('').forEach(function (val, i) {
+        if (val != str1.charAt(i)) diff += val;
+    });
+    return diff;
+}
+
 
 document.getElementById("export_to_xls").addEventListener('click', exportEXCEL);
 
@@ -366,57 +446,3 @@ clearButton.addEventListener('click', () => {
     window.location.reload();
     localStorage.removeItem("register");
 });
-
-
-{/* <a href="javascript:void (window.open('http://127.0.0.1:5500/wrong/reports.html?ca=020001086447&pea=27710587  ','_blank'))">ดูข้อมูลไฟล์ผิดพลาด</a> */ }
-
-function createNewNode(item) {
-    const type_name = Object.keys(item)[0];
-    const value = Object.values(item)[0];
-
-    let string_html = [];
-
-    for (const [key, val] of Object.entries(value)) {
-        string_html.push(`<p><b>${key}</b> : ${val}</p>`);
-    }
-
-
-    let html = `
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>${type_name}</title>
-        </head>
-        <body>
-        ${string_html.map((v) => v).join(" ")}
-        <hr />
-        </body >
-      </html >
-    `;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-
-
-    if (type_name === "header") {
-        const node = document.createElement('a');
-        // node.href = `javascript: void (window.open("${window.location.origin}/wrong/reports.html?ca=020001086447&pea=27710587", '_blank'))`;
-        // node.href = `javascript: void (window.open("${window.location.origin}/wrong/header.html?header=${value["Meter Reading Unit"]}", '_blank'))`;
-        node.href = url;
-        node.setAttribute('target', '_blank');
-        const textNode = document.createTextNode(`<< <สายจดผิดพลาด ${value["Meter Reading Unit"]}>>>  `);
-        node.appendChild(textNode);
-        document.getElementById('missMatch').appendChild(node);
-    }
-}
-
-function grid_report(data_report) {
-    return new Grid({
-        columns: [{ id: "Contract_Account", name: "Contract Account", formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/reports.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No." }],
-        search: true,
-        pagination: { limit: 10 },
-        data: data_report,
-        sort: true
-    }).render(document.getElementById("wrapper"));
-}
-
-

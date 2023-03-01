@@ -114,6 +114,13 @@ a {
     margin-bottom: 1em;
 }
 
-.btn .excel_btn{
+.btn .excel_btn {
     background-color: rgb(88, 156, 88) !important;
+}
+
+.group-btn {
+    margin-bottom: 2.5rem;
+}
+
+.group-content{
 }

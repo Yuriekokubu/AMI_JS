@@ -14,17 +14,11 @@ PEA.appendChild(PEA_Text);
 
 const result = JSON.parse(localStorage.getItem('register'));
 
-const ca_filter = result.filter((o) => o.Contract_Account === customerParams || o.PEA_No === peaNumberParams);
-
-console.log(ca_filter);
-
-// const ca_filter = result.filter(function (item) {
-//     if (item.Contract_Account == customerParams) {
-//         return true;
-//     }
-// });
+const ca_filter = result.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 
 let n = ca_filter.length;
+
+console.log(ca_filter)
 
 for (var [key, val] of Object.entries(n == 1 ? ca_filter[0] : ca_filter[1])) {
     let formatedKey = key.slice(0, 3);
