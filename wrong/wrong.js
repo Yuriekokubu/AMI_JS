@@ -16,16 +16,21 @@ const result = JSON.parse(localStorage.getItem('register'));
 
 const ca_filter = result.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 
-let n = ca_filter.length;
 
-console.log(ca_filter)
+const filters = {
+    "015": "000000000000000"
+};
 
-for (var [key, val] of Object.entries(n == 1 ? ca_filter[0] : ca_filter[1])) {
+const filterdData = ca_filter.filter(i => Object.entries(filters).every(([k, v]) => i[k] !== v));
+
+console.log(filterdData)
+
+
+for (var [key, val] of Object.entries(filterdData[1])) {
     let formatedKey = key.slice(0, 3);
     let formatNum = parseInt(val, 10);
     var numb = formatedKey.trim();
     let isNumeric = /^\d+$/.test(parseInt(key));
-
 
     function date_090(value) {
         let val = value.slice(6, 12);
@@ -47,16 +52,16 @@ for (var [key, val] of Object.entries(n == 1 ? ca_filter[0] : ca_filter[1])) {
     if (isNumeric) {
         const node = document.getElementById(numb);
         let numberWithDecimal = (formatNum / 100).toFixed(3);
-        if (numb === "090") {
-            numberWithDecimal = date_090(val);
-        }
-        if (numb === "091") {
-            numberWithDecimal = time_091(val);
+        switch (numb) {
+            case "090":
+                numberWithDecimal = date_090(val);
+                break;
+            case "091":
+                numberWithDecimal = time_091(val);
+            default:
+                break;
         }
         const node_val = document.createTextNode(numberWithDecimal);
         node.appendChild(node_val);
     }
-
 }
-
-

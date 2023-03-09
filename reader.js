@@ -2,10 +2,17 @@ import {
     Grid,
     html
 } from "https://unpkg.com/gridjs?module";
+import { hello } from './array.js';
 
 const textDrop = document.getElementById('text-drop');
 let filename = [];
 let count = 0;
+let headerFailedPosition = [];
+let CustomerFailedPosition = [];
+let RegisterFailedPosition = [];
+let isAmi;
+let checkSameFileType = [];
+
 
 const upload = async (event, cb) => {
     if (localStorage.getItem('key')) {
@@ -19,10 +26,29 @@ const upload = async (event, cb) => {
 
     let arrFile = [].slice.call(event);
 
-    let fileSorted = arrFile.sort((a, b) => a.name - b.name);
+    // let fileSorted = arrFile.sort((a, b) => a.name.localeCompare(b.name));
+
+    let fileSorted = _.sortBy(arrFile, 'size');
+
+    console.log(fileSorted);
 
     let files = Array.from(fileSorted).map((file, i) => {
         filename.push(file.name);
+
+        let cutFileExtension = file.name.replace(/\.[^/.]+$/, "");
+        checkSameFileType.push(cutFileExtension.slice(0, -1));
+
+        if (filename.length === 2) {
+            let isSame = new Set(checkSameFileType).size == 1;
+            if (!isSame) {
+                alert('ไฟล์ไม่ตรงกัน');
+                return;
+            }
+        }
+
+        if (cutFileExtension.charAt(cutFileExtension.length - 1) == "2") {
+            isAmi = true;
+        }
 
         textDrop.innerHTML = filename;
         // Define a new file reader
@@ -37,14 +63,13 @@ const upload = async (event, cb) => {
                 let newArray = data.split(/\r?\n/);
                 // resolve(newArray);
 
-                // document.getElementById('output')
-                //     .textContent = fr.result;
-
                 //H=72 //C=163 //R=144
                 let ArrayIndex = [];
 
                 //Find Head Index
                 for (let [index, elem] of newArray.entries()) {
+                    //splice blank line (last page)
+                    elem === '' && newArray.splice(index, 1);
                     let firstChar = elem.charAt(0);
                     if (elem.length === 72 || 84 && firstChar === "H") {
                         ArrayIndex.push(index);
@@ -68,16 +93,16 @@ const upload = async (event, cb) => {
 
                 //Seperate Values
                 const Seperate = MergeArray.map((val, index) => {
-
                     const Arr_sorted = [];
 
                     for (let [index, elem] of val.entries()) {
                         let firstCharH = elem.charAt(0);
                         let firstCharC = elem.charAt(0);
                         let firstCharR = elem.charAt(0);
-                        elem.length >= 72 && firstCharH === "H" && Arr_sorted.push(HeaderFn(elem));
-                        elem.length >= 160 && firstCharC === "C" && Arr_sorted.push(CustomerFn(elem));
-                        elem.length >= 144 && firstCharR === "R" && Arr_sorted.push(RegisterFn(elem));
+                        //72,162,144
+                        firstCharH === "H" && Arr_sorted.push(HeaderFn(elem));
+                        firstCharC === "C" && Arr_sorted.push(CustomerFn(elem));
+                        firstCharR === "R" && Arr_sorted.push(RegisterFn(elem));
                     }
                     return Arr_sorted;
                 });
@@ -183,6 +208,9 @@ const upload = async (event, cb) => {
 
 //SubString
 function HeaderFn(str) {
+    str.length !== 72 && headerFailedPosition.push({ 'header_miss_position': str });
+
+
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 13], [14, 17], [18, 34], [35, 51], [52, 59], [60, 62], [63, 64], [65, 72]];
 
@@ -194,6 +222,8 @@ function HeaderFn(str) {
 }
 
 function CustomerFn(str) {
+    str.length !== 163 && CustomerFailedPosition.push({ 'customer_miss_position': str });
+
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 19], [20, 31], [32, 39], [40, 59], [60, 69], [70, 77], [78, 85], [86, 89], [90, 97], [98, 98], [99, 99], [100, 100], [101, 101], [102, 102], [103, 112], [113, 122], [123, 123], [124, 127], [128, 132], [133, 137], [138, 143], [144, 160], [161, 164]];
 
@@ -211,6 +241,7 @@ function CustomerFn(str) {
 }
 
 function RegisterFn(str) {
+    str.length !== 144 && RegisterFailedPosition.push({ 'register_miss_position': str });
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 19], [20, 22], [23, 42], [43, 44], [45, 52], [53, 67], [68, 82], [83, 83], [84, 84], [85, 87], [88, 88], [89, 98], [99, 108], [109, 123], [124, 138], [139, 142], [143, 144]];
 
@@ -287,12 +318,30 @@ const callback = (e) => {
             // console.log(map1);
             // console.log(map2);
 
+            const difference = (obj1, obj2) => {
+                let keyFound = false;
+                Object.keys(obj1).forEach(key => {
+                    if (obj1[key] !== obj2[key]) {
+                        keyFound = { ["warning_mistake"]: key + " = " + obj2[key] };
+                        return keyFound;
+                    };
+                });
+                return keyFound || -1;
+            };
+
             Object.keys(o1).map((o, i) => {
                 let isMatch = _.isEqual(o1[o], o2[i]);
-                isMatch === false && arrMisMatch.push({ "customer": map2[o] });
+                if (!isMatch) {
+                    /////// D I FF
+                    const diff_ = difference(o1[o], o2[i]);
+                    console.log(diff_)
+                    Object.assign(map2[o], diff_);
+                    console.log(map2[o])
+                    arrMisMatch.push({ "customer": map2[o] });
+                }
             });
         }
-    }
+    };
 
     let arr_obj = {};
     Array.from(data_to_export).map(({ Contract_Account, Register }) => {
@@ -300,8 +349,8 @@ const callback = (e) => {
         Register.forEach((element, index) => {
             //['R', 'GRST9800', '27710591  ', '013', '00000000002322946276', '01', '015     ', '000000000012384'] L:19
             if (element[2]) arr_obj["PEA_No"] = element[2].trim();
-            if (element[7]) arr_obj[`${element[6]}`] = element[7];
-            if (element[8]) arr_obj[`${element[6]}`] = element[8];
+            if (element[7]) arr_obj[element[6]] = element[7].trim();
+            if (element[8]) arr_obj[element[6]] = element[8].trim();
             index === 17 && arr.push({ Contract_Account, ...arr_obj });
         });
     });
@@ -334,8 +383,22 @@ const callback = (e) => {
     grid.data = arr;
 
     let miss_sorted = arrMisMatch.filter(({ customer }) => customer).map(({ customer }) => customer);
-    count === 2 && arrMisMatch.length > 0 && grid_report(miss_sorted);
-    console.log(miss_sorted)
+
+    console.log(miss_sorted);
+
+    function no_match_wrong() {
+        if (count == 2) {
+            const para = document.getElementById('no_match_wrong');
+            para.innerText = "ไม่พบข้อมูลผิดพลาด";
+        }
+    }
+
+    count === 2 && arrMisMatch.length > 0 ? grid_report(miss_sorted) : no_match_wrong();
+
+
+    console.log(headerFailedPosition);
+    console.log(CustomerFailedPosition);
+    console.log(RegisterFailedPosition);
 };
 
 const exportEXCEL = () => {
@@ -357,7 +420,6 @@ function createNewNode(item) {
     for (const [key, val] of Object.entries(value)) {
         string_html.push(`<p> <b>${key}</b> : ${val}</p>`);
     }
-
 
     let html = `
         <html>
@@ -389,7 +451,7 @@ function createNewNode(item) {
 
 function grid_report(data_report) {
     return new Grid({
-        columns: [{ id: "Contract_Account", name: "Contract Account (ข้อมูลผู้ใช้ผิด)", formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/reports.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No.", width: '25%' }, { name: "สาเหตุผิดพลาด", width: '25%' }],
+        columns: [{ id: "Contract_Account", name: "Contract Account (ข้อมูลผู้ใช้ผิด)", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No.", width: '25%' }, { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%' }],
         search: true,
         pagination: { limit: 10 },
         data: data_report,
@@ -446,3 +508,22 @@ clearButton.addEventListener('click', () => {
     window.location.reload();
     localStorage.removeItem("register");
 });
+
+function positionMistake(arr) {
+
+    const node = document.createElement('a');
+
+    arr.map((v) => {
+
+    });
+    // if (type_name === "header") {
+    //     const node = document.createElement('a');
+    //     // node.href = `javascript: void (window.open("${window.location.origin}/wrong/reports.html?ca=020001086447&pea=27710587", '_blank'))`;
+    //     // node.href = `javascript: void (window.open("${window.location.origin}/wrong/header.html?header=${value["Meter Reading Unit"]}", '_blank'))`;
+    //     node.href = url;
+    //     node.setAttribute('target', '_blank');
+    //     const textNode = document.createTextNode(`<<<สายจดผิดพลาด ${value["Meter Reading Unit"]}>>>`);
+    //     node.appendChild(textNode);
+    //     document.getElementById('missMatch').appendChild(node);
+    // }
+}
