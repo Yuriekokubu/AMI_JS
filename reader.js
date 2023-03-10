@@ -15,8 +15,8 @@ let checkSameFileType = [];
 
 
 const upload = async (event, cb) => {
-    if (localStorage.getItem('key')) {
-        localStorage.removeItem("register");
+    if (localStorage.getItem('register')) {
+        localStorage.clear();
     }
     // Convert the FileList into an array and iterate
     if (event.length > 2) {
@@ -30,7 +30,6 @@ const upload = async (event, cb) => {
 
     let fileSorted = _.sortBy(arrFile, 'size');
 
-    console.log(fileSorted);
 
     let files = Array.from(fileSorted).map((file, i) => {
         filename.push(file.name);
@@ -319,14 +318,16 @@ const callback = (e) => {
             // console.log(map2);
 
             const difference = (obj1, obj2) => {
-                let keyFound = false;
+                let keyFound = "";
+                let fullKey_details = {};
                 Object.keys(obj1).forEach(key => {
                     if (obj1[key] !== obj2[key]) {
-                        keyFound = { ["warning_mistake"]: key + " = " + obj2[key] };
-                        return keyFound;
+                        // keyFound = { ["warning_mistake"]: key + " = " + obj2[key] };
+                        keyFound += obj2[key] + ",";
+                        fullKey_details[key] = obj2[key];
                     };
                 });
-                return keyFound || -1;
+                return { keyFound, fullKey_details };
             };
 
             Object.keys(o1).map((o, i) => {
@@ -334,9 +335,9 @@ const callback = (e) => {
                 if (!isMatch) {
                     /////// D I FF
                     const diff_ = difference(o1[o], o2[i]);
-                    console.log(diff_)
-                    Object.assign(map2[o], diff_);
-                    console.log(map2[o])
+                    let concatKeyFailed = Object.keys(diff_.fullKey_details).join(",");
+                    let warn_obj = { ["warning_mistake"]: concatKeyFailed, ["waring_details"]: diff_.keyFound };
+                    Object.assign(map2[o], warn_obj);
                     arrMisMatch.push({ "customer": map2[o] });
                 }
             });
@@ -384,7 +385,7 @@ const callback = (e) => {
 
     let miss_sorted = arrMisMatch.filter(({ customer }) => customer).map(({ customer }) => customer);
 
-    console.log(miss_sorted);
+    localStorage.setItem('customer_mistake', JSON.stringify(miss_sorted));
 
     function no_match_wrong() {
         if (count == 2) {
@@ -394,7 +395,6 @@ const callback = (e) => {
     }
 
     count === 2 && arrMisMatch.length > 0 ? grid_report(miss_sorted) : no_match_wrong();
-
 
     console.log(headerFailedPosition);
     console.log(CustomerFailedPosition);
@@ -451,7 +451,12 @@ function createNewNode(item) {
 
 function grid_report(data_report) {
     return new Grid({
-        columns: [{ id: "Contract_Account", name: "Contract Account (ข้อมูลผู้ใช้ผิด)", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) }, { id: "PEA_No", name: "PEA No.", width: '25%' }, { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%' }],
+        columns: [
+            { id: "Contract_Account", name: "Contract Account (ข้อมูลผู้ใช้ผิด)", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "PEA_No", name: "PEA No.", width: '25%' },
+            { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#fc4444">${v}</p>`)) }
+            // `<p style="color:#ff4444">${v}</p><br>`;
+        ],
         search: true,
         pagination: { limit: 10 },
         data: data_report,
@@ -506,7 +511,7 @@ const clearButton = document.getElementById('clear');
 
 clearButton.addEventListener('click', () => {
     window.location.reload();
-    localStorage.removeItem("register");
+    localStorage.clear();
 });
 
 function positionMistake(arr) {

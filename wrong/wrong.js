@@ -13,17 +13,21 @@ CA.appendChild(CA_Text);
 PEA.appendChild(PEA_Text);
 
 const result = JSON.parse(localStorage.getItem('register'));
+const result_mistake = JSON.parse(localStorage.getItem('customer_mistake'));
+
+
 
 const ca_filter = result.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
+const cus_filter = result_mistake.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 
-
+console.log(cus_filter);
 const filters = {
     "015": "000000000000000"
 };
 
 const filterdData = ca_filter.filter(i => Object.entries(filters).every(([k, v]) => i[k] !== v));
 
-console.log(filterdData)
+console.log(filterdData);
 
 
 for (var [key, val] of Object.entries(filterdData[1])) {
