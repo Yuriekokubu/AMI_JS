@@ -456,7 +456,7 @@ function createNewNode(item) {
 function grid_report(data_report) {
     return new Grid({
         columns: [
-            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
             { id: "PEA_No", name: "รหัสผู้ใช้ไฟ", width: '25%' },
             { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#fc4444">${v}</p>`)) }
         ],
