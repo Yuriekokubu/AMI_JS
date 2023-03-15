@@ -296,7 +296,8 @@ const callback = (e) => {
                 }
             });
         }
-        arrMisMatch.length !== 0 && arrMisMatch.map((v) => createNewNode(v));
+        let headMisMatchFiltered = arrMisMatch.filter((v) => v.header);
+        arrMisMatch.length !== 0 && grid_report3(headMisMatchFiltered);
     }
 
     // CUSTOMER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -456,28 +457,53 @@ function createNewNode(item) {
 function grid_report(data_report) {
     return new Grid({
         columns: [
-            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
             { id: "PEA_No", name: "รหัสผู้ใช้ไฟ", width: '25%' },
             { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#fc4444">${v}</p>`)) }
         ],
-        search: true,
         pagination: { limit: 10 },
         data: data_report,
-        sort: true
+        sort: true,
+        style: {
+            th: {
+                'background-color': "#c54ce0",
+                "color": "black",
+            }
+        }
     }).render(document.getElementById("wrapper"));
 }
 
 function grid_report2() {
     let mergeArr = _.union(headerFailedPosition, CustomerFailedPosition, RegisterFailedPosition);
-    console.log(mergeArr);
     return new Grid({
-        columns: [{ name: 'รหัส' }, { name: 'ตำแหน่งผิดพลาด', width: '60%' }, { name: 'จำนวนตำแหน่ง' }],
-        search: true,
+        columns: [{ name: 'ตำแหน่งผิดพลาด' }, { name: 'รายละเอียด', width: '60%' }, { name: 'จำนวนตำแหน่ง' }],
         pagination: { limit: 10 },
         data: mergeArr,
         sort: true,
-        resizable: true
+        style: {
+            th: {
+                'background-color': "#6b83ff",
+                "color": "black",
+            }
+        }
     }).render(document.getElementById("wrapper2"));
+}
+
+function grid_report3(value) {
+    let header_filtered = value.map(({ header }) => header);
+    console.log(header_filtered);
+    return new Grid({
+        columns: [{ id: "Meter Reading Unit", name: "สายจดหน่วยผิดพลาด" }],
+        pagination: { limit: 10 },
+        data: header_filtered,
+        sort: true,
+        style: {
+            th: {
+                'background-color': "#91ff9f",
+                "color": "black",
+            }
+        }
+    }).render(document.getElementById("wrapper3"));
 }
 
 
