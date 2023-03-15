@@ -73,6 +73,7 @@ const upload = async (event, cb) => {
                     if (elem.length === 72 || 84 && firstChar === "H") {
                         ArrayIndex.push(index);
                     }
+                    firstChar === "H" && ArrayIndex.push(index);
                 }
 
                 // elem.length == 72 || 84 
@@ -207,8 +208,9 @@ const upload = async (event, cb) => {
 
 //SubString
 function HeaderFn(str) {
-    str.length !== 72 && headerFailedPosition.push({ 'header_miss_position': str });
-
+    let expect_len = 72;
+    let getHead = str.slice(1, 9);
+    str.length !== expect_len && headerFailedPosition.push([getHead, str, str.length + '/' + expect_len]);
 
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 13], [14, 17], [18, 34], [35, 51], [52, 59], [60, 62], [63, 64], [65, 72]];
@@ -221,7 +223,9 @@ function HeaderFn(str) {
 }
 
 function CustomerFn(str) {
-    str.length !== 163 && CustomerFailedPosition.push({ 'customer_miss_position': str });
+    let expect_len = 163;
+    let getCus = str.slice(19, 31);
+    str.length !== expect_len && CustomerFailedPosition.push([getCus, str, str.length + '/' + expect_len]);
 
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 19], [20, 31], [32, 39], [40, 59], [60, 69], [70, 77], [78, 85], [86, 89], [90, 97], [98, 98], [99, 99], [100, 100], [101, 101], [102, 102], [103, 112], [113, 122], [123, 123], [124, 127], [128, 132], [133, 137], [138, 143], [144, 160], [161, 164]];
@@ -240,7 +244,9 @@ function CustomerFn(str) {
 }
 
 function RegisterFn(str) {
-    str.length !== 144 && RegisterFailedPosition.push({ 'register_miss_position': str });
+    let expect_len = 144;
+    let getCus = str.slice(19, 31);
+    str.length !== expect_len && RegisterFailedPosition.push([getCus, str, str.length + '/' + expect_len]);
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 19], [20, 22], [23, 42], [43, 44], [45, 52], [53, 67], [68, 82], [83, 83], [84, 84], [85, 87], [88, 88], [89, 98], [99, 108], [109, 123], [124, 138], [139, 142], [143, 144]];
 
@@ -394,12 +400,10 @@ const callback = (e) => {
         }
     }
 
+    count === 2 && grid_report2();
     count === 2 && arrMisMatch.length > 0 ? grid_report(miss_sorted) : no_match_wrong();
-
-    console.log(headerFailedPosition);
-    console.log(CustomerFailedPosition);
-    console.log(RegisterFailedPosition);
 };
+
 
 const exportEXCEL = () => {
     if (filename.length === 0) return;
@@ -452,8 +456,8 @@ function createNewNode(item) {
 function grid_report(data_report) {
     return new Grid({
         columns: [
-            { id: "Contract_Account", name: "Contract Account (ข้อมูลผู้ใช้ผิด)", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
-            { id: "PEA_No", name: "PEA No.", width: '25%' },
+            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "PEA_No", name: "รหัสผู้ใช้ไฟ", width: '25%' },
             { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#fc4444">${v}</p>`)) }
         ],
         search: true,
@@ -461,6 +465,19 @@ function grid_report(data_report) {
         data: data_report,
         sort: true
     }).render(document.getElementById("wrapper"));
+}
+
+function grid_report2() {
+    let mergeArr = _.union(headerFailedPosition, CustomerFailedPosition, RegisterFailedPosition);
+    console.log(mergeArr);
+    return new Grid({
+        columns: [{ name: 'รหัส' }, { name: 'ตำแหน่งผิดพลาด', width: '60%' }, { name: 'จำนวนตำแหน่ง' }],
+        search: true,
+        pagination: { limit: 10 },
+        data: mergeArr,
+        sort: true,
+        resizable: true
+    }).render(document.getElementById("wrapper2"));
 }
 
 

@@ -15,25 +15,34 @@ PEA.appendChild(PEA_Text);
 const result = JSON.parse(localStorage.getItem('register'));
 const result_mistake = JSON.parse(localStorage.getItem('customer_mistake'));
 
-
-
 const ca_filter = result.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 const cus_filter = result_mistake.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 
-console.log(cus_filter);
-const filters = {
-    "015": "000000000000000"
-};
-
-const filterdData = ca_filter.filter(i => Object.entries(filters).every(([k, v]) => i[k] !== v));
+let filterdData = ca_filter.map(({ ["Contract_Account"]: CA, ["PEA_No"]: PEA, ...i }) => i);
 
 console.log(filterdData);
 
+const isAllZeroThreshold = (currentValue) => currentValue === '000000000000000';
 
-for (var [key, val] of Object.entries(filterdData[1])) {
+let not_zero = filterdData.filter((v, i) => !Object.values(v).every(isAllZeroThreshold));
+
+
+function check_undefined(value) {
+    if (value === undefined) {
+        console.log(filterdData[1]);
+        return filterdData[1];
+    }
+    return value;
+}
+
+console.log(not_zero);
+
+for (var [key, val] of Object.entries(check_undefined(not_zero[0]))) {
+    console.log(key, val);
     let formatedKey = key.slice(0, 3);
     let formatNum = parseInt(val, 10);
     var numb = formatedKey.trim();
+    console.log(numb);
     let isNumeric = /^\d+$/.test(parseInt(key));
 
     function date_090(value) {
