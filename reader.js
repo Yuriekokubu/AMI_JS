@@ -2,7 +2,7 @@ import {
     Grid,
     html
 } from "https://unpkg.com/gridjs?module";
-import { hello } from './array.js';
+import { difference } from './module.js';
 
 const textDrop = document.getElementById('text-drop');
 let filename = [];
@@ -281,22 +281,29 @@ const callback = (e) => {
         let map2H = Object.values(o2_mapH).map((o) => o);
 
         if (map1H.length === map2H.length) {
-            let o1H = map1H.map(({ ["Number of Actual Read"]: numAcRead, ...o }) => o);
-            let o2H = map2H.map(({ ["Number of Actual Read"]: numAcRead, ...o }) => o);
+            // let o1H = map1H.map(({ ["Number of Actual Read"]: numAcRead, ...o }) => o);
+            // let o2H = map2H.map(({ ["Number of Actual Read"]: numAcRead, ...o }) => o);
+            let o1H = map1H;
+            let o2H = map2H;
 
             Object.keys(o1H).map((o, i) => {
                 let numeric = new RegExp(/^\d+$/).test(map2H[o]["Number of Actual Read"]);
-                if (numeric) {
-                    let isMatch = _.isEqual(o1H[o], o2H[i]);
+                let isMatch = _.isEqual(o1H[o], o2H[i]);
+                if (!numeric) {
                     if (!isMatch) {
+                        const diff_ = difference(o1H[o], o2H[i]);
+                        let keyDiff = Object.keys(diff_.fullKey_details);
+                        let concatKeyFailed = keyDiff.join(",");
+                        let arr_concat = diff_.arr.join(",");
+                        let warn_obj = { ["warning_mistake"]: concatKeyFailed, ["warning_details"]: arr_concat };
+                        Object.assign(map2H[o], warn_obj);
                         arrMisMatch.push({ "header": map2H[i] });
                     }
-                } else {
-                    arrMisMatch.push({ "header": map2H[i] });
                 }
             });
         }
         let headMisMatchFiltered = arrMisMatch.filter((v) => v.header);
+        localStorage.setItem('header', JSON.stringify(headMisMatchFiltered));
         arrMisMatch.length !== 0 && grid_report3(headMisMatchFiltered);
     }
 
@@ -321,29 +328,13 @@ const callback = (e) => {
             const o1 = Object.values(map1).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"]));
             const o2 = Object.values(map2).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"]));
 
-            // console.log(map1);
-            // console.log(map2);
-
-            const difference = (obj1, obj2) => {
-                let keyFound = "";
-                let fullKey_details = {};
-                Object.keys(obj1).forEach(key => {
-                    if (obj1[key] !== obj2[key]) {
-                        // keyFound = { ["warning_mistake"]: key + " = " + obj2[key] };
-                        keyFound += obj2[key] + ",";
-                        fullKey_details[key] = obj2[key];
-                    };
-                });
-                return { keyFound, fullKey_details };
-            };
-
             Object.keys(o1).map((o, i) => {
                 let isMatch = _.isEqual(o1[o], o2[i]);
                 if (!isMatch) {
                     /////// D I FF
                     const diff_ = difference(o1[o], o2[i]);
                     let concatKeyFailed = Object.keys(diff_.fullKey_details).join(",");
-                    let warn_obj = { ["warning_mistake"]: concatKeyFailed, ["waring_details"]: diff_.keyFound };
+                    let warn_obj = { ["warning_mistake"]: concatKeyFailed, ["warning_details"]: diff_.keyFound };
                     Object.assign(map2[o], warn_obj);
                     arrMisMatch.push({ "customer": map2[o] });
                 }
@@ -459,14 +450,14 @@ function grid_report(data_report) {
         columns: [
             { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
             { id: "PEA_No", name: "รหัสผู้ใช้ไฟ", width: '25%' },
-            { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#fc4444">${v}</p>`)) }
+            { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#ff7575">${v}</p>`)) }
         ],
         pagination: { limit: 10 },
         data: data_report,
         sort: true,
         style: {
             th: {
-                'background-color': "#c54ce0",
+                'background-color': "#ecd3ff",
                 "color": "black",
             }
         }
@@ -480,9 +471,10 @@ function grid_report2() {
         pagination: { limit: 10 },
         data: mergeArr,
         sort: true,
+        search: true,
         style: {
             th: {
-                'background-color': "#6b83ff",
+                'background-color': "#bcffda",
                 "color": "black",
             }
         }
@@ -491,15 +483,18 @@ function grid_report2() {
 
 function grid_report3(value) {
     let header_filtered = value.map(({ header }) => header);
-    console.log(header_filtered);
     return new Grid({
-        columns: [{ id: "Meter Reading Unit", name: "สายจดหน่วยผิดพลาด" }],
+        columns: [
+            { id: "Meter Reading Unit", name: "สายจดหน่วยผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/header.html?head=${row.cells[0].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "warning_details", name: "รายละเอียดผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[1].data).split(" ").map((v) => `<p style="color:#ff7575">${v}</p>`)) },
+            { id: "warning_mistake", name: "หัวข้อผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#ff7575">${v}</p>`)) }
+        ],
         pagination: { limit: 10 },
         data: header_filtered,
         sort: true,
         style: {
             th: {
-                'background-color': "#91ff9f",
+                'background-color': "#d9d8ff",
                 "color": "black",
             }
         }

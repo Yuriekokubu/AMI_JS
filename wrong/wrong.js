@@ -20,7 +20,13 @@ const cus_filter = result_mistake.filter((o) => o.PEA_No === peaNumberParams || 
 
 let filterdData = ca_filter.map(({ ["Contract_Account"]: CA, ["PEA_No"]: PEA, ...i }) => i);
 
-console.log(filterdData);
+let [obj] = cus_filter;
+
+let { warning_mistake, warning_details } = obj;
+
+let wrong_node = document.getElementById('wrong');
+wrong_node.innerText = warning_mistake + " : " + warning_details;
+wrong_node.style.color = "red";
 
 const isAllZeroThreshold = (currentValue) => currentValue === '000000000000000';
 
@@ -35,14 +41,11 @@ function check_undefined(value) {
     return value;
 }
 
-console.log(not_zero);
 
 for (var [key, val] of Object.entries(check_undefined(not_zero[0]))) {
-    console.log(key, val);
     let formatedKey = key.slice(0, 3);
     let formatNum = parseInt(val, 10);
     var numb = formatedKey.trim();
-    console.log(numb);
     let isNumeric = /^\d+$/.test(parseInt(key));
 
     function date_090(value) {

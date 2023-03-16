@@ -9,8 +9,19 @@
 
 // console.log(str.match(/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/).join(''))
 
-const hello = () => {
-    return console.log('hello');
+const difference = (obj1, obj2) => {
+    let arr = [];
+    let keyFound = "";
+    let fullKey_details = {};
+    Object.keys(obj1).forEach(key => {
+        if (obj1[key] !== obj2[key]) {
+            let diff_val = Object.values(obj2[key]).join("");
+            arr.push(diff_val);
+            keyFound += obj2[key] + " ";
+            fullKey_details[key] = obj2[key];
+        };
+    });
+    return { keyFound, fullKey_details, arr };
 };
 
-export default hello;
+export { difference };
