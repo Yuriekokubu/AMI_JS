@@ -24,9 +24,8 @@ pre_node.style.fontSize = '1.5em';
 let text_to_fill = JSON.stringify(h.header, undefined, 2);
 
 let newText;
-const regex = new RegExp(regex_str, 'g');
+const regex = new RegExp(regex_str, "g");
 let text = pre_node.innerHTML;
-text = text.replace(/(<mark class="highlight">|<\/mark>)(^[\s]+|[\s]+$)/gim, '');
-newText = text_to_fill.replace(regex, (matched) => `<mark class="highlight">${matched}</mark > `);
-console.log(newText);
+text = text.replace(/(<mark class="highlight">|<\/mark>)^[\w&.-]+$/gim, '');
+newText = text_to_fill.replace(regex, (matched) => `<mark class="highlight">${matched}</mark >`);
 pre_node.innerHTML = newText;

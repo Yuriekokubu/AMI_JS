@@ -28,10 +28,10 @@ const upload = async (event, cb) => {
 
     // let fileSorted = arrFile.sort((a, b) => a.name.localeCompare(b.name));
 
-    let fileSorted = _.sortBy(arrFile, 'size');
+    let fileSorted = _.sortBy(arrFile, 'name');
 
 
-    let files = Array.from(fileSorted).map((file, i) => {
+    let files = fileSorted.map((file, i) => {
         filename.push(file.name);
 
         let cutFileExtension = file.name.replace(/\.[^/.]+$/, "");
@@ -55,7 +55,6 @@ const upload = async (event, cb) => {
 
         // Create a new promise
         return new Promise((resolve, reject) => {
-
             // Resolve the promise after reading file
             reader.onload = () => {
                 let data = reader.result;
@@ -304,7 +303,7 @@ const callback = (e) => {
         }
         let headMisMatchFiltered = arrMisMatch.filter((v) => v.header);
         localStorage.setItem('header', JSON.stringify(headMisMatchFiltered));
-        arrMisMatch.length !== 0 && grid_report3(headMisMatchFiltered);
+        arrMisMatch.length > 0 && grid_report3(headMisMatchFiltered);
     }
 
     // CUSTOMER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
