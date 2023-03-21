@@ -15,16 +15,19 @@ let checkSameFileType = [];
 
 
 const upload = async (event, cb) => {
+    let fileLen = event.length;
+
     if (localStorage.getItem('register')) {
         localStorage.clear();
     }
     // Convert the FileList into an array and iterate
-    if (event.length > 2) {
+    if (fileLen > 2) {
         alert('Maximum files input by 2');
         return;
     }
 
     let arrFile = [].slice.call(event);
+
 
     // let fileSorted = arrFile.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -178,7 +181,7 @@ const upload = async (event, cb) => {
                         }
 
                         //Find Register
-                        if (item.length === 19 && customerID === item[0][2]) {
+                        if (customerID === item[0][2]) {
                             RegisterGroup.push(item);
                             RegisterGroup.sort((a, b) => a[2] - b[2] || a[5] - b[5] || a[6] - b[6]);
                             registerToFill = RegisterGroup.filter((e, i) => e[2] === item[2]);
@@ -230,21 +233,15 @@ function CustomerFn(str) {
     let arr = [[0, 1], [2, 9], [10, 19], [20, 31], [32, 39], [40, 59], [60, 69], [70, 77], [78, 85], [86, 89], [90, 97], [98, 98], [99, 99], [100, 100], [101, 101], [102, 102], [103, 112], [113, 122], [123, 123], [124, 127], [128, 132], [133, 137], [138, 143], [144, 160], [161, 164]];
 
     for (let [index, elem] of arr.entries()) {
-        // if (elem[0] == 70) {
-        //     let sub = str.substring(elem[0] - 1, elem[1]);
-        //     let matchAddress = sub.charCodeAt() !== 32 ? sub.match(/[0-9&/]/g)?.join("") : sub;
-        //     combineArr.push(matchAddress);
-        // } else {
         let sub = str.substring(elem[0] - 1, elem[1]);
         combineArr.push(sub);
-        // }
     }
     return combineArr;
 }
 
 function RegisterFn(str) {
     let expect_len = 144;
-    let getCus = str.slice(19, 31);
+    let getCus = str.slice(9, 17);
     str.length !== expect_len && RegisterFailedPosition.push([getCus, str, str.length + '/' + expect_len]);
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 19], [20, 22], [23, 42], [43, 44], [45, 52], [53, 67], [68, 82], [83, 83], [84, 84], [85, 87], [88, 88], [89, 98], [99, 108], [109, 123], [124, 138], [139, 142], [143, 144]];
@@ -262,13 +259,52 @@ let arr = [];
 let objH = [];
 let objC = [];
 let arrMisMatch = [];
+let objRegister = [];
 
 const callback = (e) => {
     count++;
     obj_To_XLS = e;
 
+    /////////// REGISTER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    let register_map = obj_To_XLS;
+
+    register_map.map(({ customer }) => customer.map(({ PEA_No, Register }) => objRegister.push({ [PEA_No.trim()]: Register })));
+
+    let new_sorted_1 = objRegister.sort((a, b) => Object.keys(a) - Object.keys(b));
+
+    console.log(new_sorted_1);
+
+    // if (count == 2) {
+    //     new_sorted_1.map((o1, i) => {
+    //         ///o1 = {5701542308: Array(18)}
+    //         let o2 = new_sorted_2[i];
+    //         let obj_1_key = Object.keys(o1);
+    //         let obj_2_key = Object.keys(o2);
+    //         let obj_1_val = Object.values(o1);
+    //         let obj_2_val = Object.values(o2);
+    //         if (obj_1_key.toString() == obj_2_key.toString()) {
+    //             let removeValFromIndex = [8, 15, 16];
+    //             obj_1_val.map((v, i) => {
+    //                 v.map((o) => {
+    //                     for (const i of removeValFromIndex.reverse()) {
+    //                         o.splice(i, 1);
+    //                     }
+    //                 });
+    //             });
+    //             obj_2_val.map((v, i) => {
+    //                 v.map((o) => {
+    //                     for (const i of removeValFromIndex.reverse()) {
+    //                         o.splice(i, 1);
+    //                     }
+    //                 });
+    //             });
+    //         }
+    //     });
+    // }
+
     // HEADER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     let obHead = obj_To_XLS.map((o) => o.header);
+
     objH.push({ ...obHead });
     const arrObjH = Object.values(objH);
 
@@ -404,8 +440,6 @@ const exportEXCEL = () => {
     XLSX.writeFile(workbook, "test.xlsx", { compression: true });
 };
 
-{/* <a href="javascript:void (window.open('http://127.0.0.1:5500/wrong/reports.html?ca=020001086447&pea=27710587  ','_blank'))">ดูข้อมูลไฟล์ผิดพลาด</a> */ }
-
 function createNewNode(item) {
     const type_name = Object.keys(item)[0];
     const value = Object.values(item)[0];
@@ -434,8 +468,6 @@ function createNewNode(item) {
 
     if (type_name === "header") {
         const node = document.createElement('a');
-        // node.href = `javascript: void (window.open("${window.location.origin}/wrong/reports.html?ca=020001086447&pea=27710587", '_blank'))`;
-        // node.href = `javascript: void (window.open("${window.location.origin}/wrong/header.html?header=${value["Meter Reading Unit"]}", '_blank'))`;
         node.href = url;
         node.setAttribute('target', '_blank');
         const textNode = document.createTextNode(`<<<สายจดผิดพลาด ${value["Meter Reading Unit"]}>>>`);
@@ -549,22 +581,3 @@ clearButton.addEventListener('click', () => {
     window.location.reload();
     localStorage.clear();
 });
-
-function positionMistake(arr) {
-
-    const node = document.createElement('a');
-
-    arr.map((v) => {
-
-    });
-    // if (type_name === "header") {
-    //     const node = document.createElement('a');
-    //     // node.href = `javascript: void (window.open("${window.location.origin}/wrong/reports.html?ca=020001086447&pea=27710587", '_blank'))`;
-    //     // node.href = `javascript: void (window.open("${window.location.origin}/wrong/header.html?header=${value["Meter Reading Unit"]}", '_blank'))`;
-    //     node.href = url;
-    //     node.setAttribute('target', '_blank');
-    //     const textNode = document.createTextNode(`<<<สายจดผิดพลาด ${value["Meter Reading Unit"]}>>>`);
-    //     node.appendChild(textNode);
-    //     document.getElementById('missMatch').appendChild(node);
-    // }
-}
