@@ -28,7 +28,6 @@ const upload = async (event, cb) => {
 
     let arrFile = [].slice.call(event);
 
-
     // let fileSorted = arrFile.sort((a, b) => a.name.localeCompare(b.name));
 
     let fileSorted = _.sortBy(arrFile, 'name');
@@ -185,7 +184,8 @@ const upload = async (event, cb) => {
                             RegisterGroup.push(item);
                             RegisterGroup.sort((a, b) => a[2] - b[2] || a[5] - b[5] || a[6] - b[6]);
                             registerToFill = RegisterGroup.filter((e, i) => e[2] === item[2]);
-                            if (registerToFill.length >= 18) {
+                            // isAmi ? registerToFill.length >= 31 : 
+                            if (isAmi ? registerToFill.length >= 31 : registerToFill.length >= 18) {
                                 customer.Register = registerToFill; //flat()
                                 RegisterGroup = [];
                             }
@@ -199,7 +199,6 @@ const upload = async (event, cb) => {
             // Read the file as a text
             reader.readAsText(file, "TIS-620");
         });
-
     });
     // At this point you'll have an array of results
 
@@ -213,6 +212,7 @@ function HeaderFn(str) {
     let expect_len = 72;
     let getHead = str.slice(1, 9);
     str.length !== expect_len && headerFailedPosition.push([getHead, str, str.length + '/' + expect_len]);
+
 
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 13], [14, 17], [18, 34], [35, 51], [52, 59], [60, 62], [63, 64], [65, 72]];
@@ -228,7 +228,6 @@ function CustomerFn(str) {
     let expect_len = 163;
     let getCus = str.slice(19, 31);
     str.length !== expect_len && CustomerFailedPosition.push([getCus, str, str.length + '/' + expect_len]);
-
     let combineArr = [];
     let arr = [[0, 1], [2, 9], [10, 19], [20, 31], [32, 39], [40, 59], [60, 69], [70, 77], [78, 85], [86, 89], [90, 97], [98, 98], [99, 99], [100, 100], [101, 101], [102, 102], [103, 112], [113, 122], [123, 123], [124, 127], [128, 132], [133, 137], [138, 143], [144, 160], [161, 164]];
 
@@ -252,6 +251,7 @@ function RegisterFn(str) {
     }
     return combineArr;
 }
+//020000530392 ///6500652119
 
 let obj_To_XLS;
 let data_to_export;
@@ -270,37 +270,76 @@ const callback = (e) => {
 
     register_map.map(({ customer }) => customer.map(({ PEA_No, Register }) => objRegister.push({ [PEA_No.trim()]: Register })));
 
-    let new_sorted_1 = objRegister.sort((a, b) => Object.keys(a) - Object.keys(b));
+    if (count === 2) {
+        let new_sorted_1 = objRegister.sort((a, b) => Object.keys(a) - Object.keys(b));
 
-    console.log(new_sorted_1);
+        const result = new_sorted_1.map((obj, index, arr) => {
+            Object.values(obj).map((v, i) => {
+                v.map((o) => {
+                    const removeValFromIndex = [8, 15, 16];
+                    for (const a of removeValFromIndex) {
+                        o.splice(a, 1);
+                    }
+                });
+            });
+            if (index % 2 === 0 && index + 1 < arr.length) {
+                const obj2 = arr[index + 1];
+                return { obj, obj2 };
+            }
+            return { obj };
+        }).filter((obj) => obj.obj2 !== undefined);
 
-    // if (count == 2) {
-    //     new_sorted_1.map((o1, i) => {
-    //         ///o1 = {5701542308: Array(18)}
-    //         let o2 = new_sorted_2[i];
-    //         let obj_1_key = Object.keys(o1);
-    //         let obj_2_key = Object.keys(o2);
-    //         let obj_1_val = Object.values(o1);
-    //         let obj_2_val = Object.values(o2);
-    //         if (obj_1_key.toString() == obj_2_key.toString()) {
-    //             let removeValFromIndex = [8, 15, 16];
-    //             obj_1_val.map((v, i) => {
-    //                 v.map((o) => {
-    //                     for (const i of removeValFromIndex.reverse()) {
-    //                         o.splice(i, 1);
-    //                     }
-    //                 });
-    //             });
-    //             obj_2_val.map((v, i) => {
-    //                 v.map((o) => {
-    //                     for (const i of removeValFromIndex.reverse()) {
-    //                         o.splice(i, 1);
-    //                     }
-    //                 });
-    //             });
-    //         }
-    //     });
-    // }
+        console.log(result);
+
+        const data = result;
+        let differences = [];
+
+        for (let item of data) {
+            let obj = Object.values(item.obj);
+            let objNext = Object.values(item.obj2);
+
+            if (obj.length !== objNext.length) {
+                console.log("obj and obj_next are different lengths");
+            } else {
+                for (let i = 0; i < obj.length; i++) {
+                    for (let j = 0; j < obj[i].length; j++) {
+                        if (JSON.stringify(obj[i][j]) !== JSON.stringify(objNext[i][j])) {
+                            differences.push([obj[i][j], objNext[i][j]]);
+                        }
+                        // if (obj[i][j] !== objNext[i][j]) {
+                        //     differences.push([obj[i][j], objNext[i][j]]);
+                        // }
+                    }
+                }
+            }
+        }
+
+        console.log(differences);
+
+        // for (let item of result) {
+        //     const obj_val = Object.values(item.obj);
+        //     const objNext_val = Object.values(item.nextObj);
+        //     const differences = [];
+
+        //     for (let i = 0; i < obj_val.length; i++) {
+        //         for (let j = 0; j < obj_val[i].length; j++) {
+        //             const obj_ = JSON.stringify(obj_val[i][j]);
+        //             const objNext_ = JSON.stringify(objNext_val[i][j]);
+        //             if (obj_ !== objNext_) {
+        //                 differences.push([obj_val[i][j], objNext_val[i][j]]);
+        //             }
+        //         }
+        //     }
+        //     if (differences.length > 0) {
+        //         console.log(`obj and obj_next have ${differences.length} difference(s):`);
+        //         for (let d of differences) {
+        //             console.log(`- ${JSON.stringify(d[0])} (obj) vs ${JSON.stringify(d[1])} (obj_next)`);
+        //         }
+        //     } else {
+        //         console.log("obj and obj_next are identical");
+        //     }
+        // }
+    }
 
     // HEADER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     let obHead = obj_To_XLS.map((o) => o.header);
@@ -339,11 +378,12 @@ const callback = (e) => {
         }
         let headMisMatchFiltered = arrMisMatch.filter((v) => v.header);
         localStorage.setItem('header', JSON.stringify(headMisMatchFiltered));
-        arrMisMatch.length > 0 && grid_report3(headMisMatchFiltered);
+        arrMisMatch.length > 0 && grid_HEAD_report3(headMisMatchFiltered);
     }
 
     // CUSTOMER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     let objcus = obj_To_XLS.map((o) => o.customer);
+
     data_to_export = objcus.flat();
     const newArray = data_to_export.map(({ Register, ...keepAttrs }) => keepAttrs);
     objC.push({ ...newArray });
@@ -360,8 +400,8 @@ const callback = (e) => {
             // const o1 = map1.map(({ ["Reading Code"]: rc, ["Actual meter reading date"]: ard, ["Actual upload date"]: aud, ["Incorrect time (min)"]: ict, ...o }) => o);
             // const o2 = map2.map(({ ["Reading Code"]: rc, ["Actual meter reading date"]: ard, ["Actual upload date"]: aud, ["Incorrect time (min)"]: ict, ...o }) => o);
 
-            const o1 = Object.values(map1).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"]));
-            const o2 = Object.values(map2).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)"]));
+            const o1 = Object.values(map1).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)", "Actual meter reading time"]));
+            const o2 = Object.values(map2).map((o, i) => _.omit((o), ["Reading Code", "Actual meter reading date", "Actual upload date", "Incorrect time (min)", "Actual meter reading time"]));
 
             Object.keys(o1).map((o, i) => {
                 let isMatch = _.isEqual(o1[o], o2[i]);
@@ -416,9 +456,9 @@ const callback = (e) => {
     grid.style.height = '100vh';
     grid.data = arr;
 
-    let miss_sorted = arrMisMatch.filter(({ customer }) => customer).map(({ customer }) => customer);
+    let miss_CA_sorted = arrMisMatch.filter(({ customer }) => customer).map(({ customer }) => customer);
 
-    localStorage.setItem('customer_mistake', JSON.stringify(miss_sorted));
+    localStorage.setItem('customer_mistake', JSON.stringify(miss_CA_sorted));
 
     function no_match_wrong() {
         if (count == 2) {
@@ -426,9 +466,8 @@ const callback = (e) => {
             para.innerText = "ไม่พบข้อมูลผิดพลาด";
         }
     }
-
-    count === 2 && grid_report2();
-    count === 2 && arrMisMatch.length > 0 ? grid_report(miss_sorted) : no_match_wrong();
+    count === 2 && headerFailedPosition.length > 1 && grid_POS_report2();
+    count === 2 && arrMisMatch.length > 0 ? grid_CA_report(miss_CA_sorted) : no_match_wrong();
 };
 
 
@@ -476,10 +515,10 @@ function createNewNode(item) {
     }
 }
 
-function grid_report(data_report) {
+function grid_CA_report(data_report) {
     return new Grid({
         columns: [
-            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "Contract_Account", name: "ข้อมูลผู้ใช้ผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/report${isAmi ? 2 : "s"}.html?ca=${row.cells[0].data}&pea=${row.cells[1].data}" target='_blank'>${row.cells[0].data}</a>`) },
             { id: "PEA_No", name: "รหัสผู้ใช้ไฟ", width: '25%' },
             { id: "warning_mistake", name: "สาเหตุผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#ff7575">${v}</p>`)) }
         ],
@@ -495,7 +534,7 @@ function grid_report(data_report) {
     }).render(document.getElementById("wrapper"));
 }
 
-function grid_report2() {
+function grid_POS_report2() {
     let mergeArr = _.union(headerFailedPosition, CustomerFailedPosition, RegisterFailedPosition);
     return new Grid({
         columns: [{ name: 'ตำแหน่งผิดพลาด' }, { name: 'รายละเอียด', width: '60%' }, { name: 'จำนวนตำแหน่ง' }],
@@ -512,11 +551,11 @@ function grid_report2() {
     }).render(document.getElementById("wrapper2"));
 }
 
-function grid_report3(value) {
+function grid_HEAD_report3(value) {
     let header_filtered = value.map(({ header }) => header);
     return new Grid({
         columns: [
-            { id: "Meter Reading Unit", name: "สายจดหน่วยผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/AMI_JS/wrong/header.html?head=${row.cells[0].data}" target='_blank'>${row.cells[0].data}</a>`) },
+            { id: "Meter Reading Unit", name: "สายจดหน่วยผิดพลาด", width: '25%', formatter: (_, row) => html(`<a href="${window.location.origin}/wrong/header.html?head=${row.cells[0].data}" target='_blank'>${row.cells[0].data}</a>`) },
             { id: "warning_details", name: "รายละเอียดผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[1].data).split(" ").map((v) => `<p style="color:#ff7575">${v}</p>`)) },
             { id: "warning_mistake", name: "หัวข้อผิดพลาด", width: '25%', formatter: (_, row) => html((row.cells[2].data).split(",").map((v) => `<p style="color:#ff7575">${v}</p>`)) }
         ],
@@ -567,6 +606,7 @@ dropzone.addEventListener('click', function (e) {
 });
 
 dropzone.addEventListener('change', (e) => upload(e.target.files, callback));
+
 
 dropzone.addEventListener('drop', function (e) {
     this.classList.remove('dropzone-dragging');

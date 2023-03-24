@@ -18,11 +18,14 @@ const result_mistake = JSON.parse(localStorage.getItem('customer_mistake'));
 const ca_filter = result.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 const cus_filter = result_mistake.filter((o) => o.PEA_No === peaNumberParams || o.Contract_Account === customerParams);
 
+// let filterdData = ca_filter.map(({ ["Contract_Account"]: CA, ["PEA_No"]: PEA, ...i }) => i);
 let filterdData = ca_filter.map(({ ["Contract_Account"]: CA, ["PEA_No"]: PEA, ...i }) => i);
 
 let [obj] = cus_filter;
 
+
 let { warning_mistake, warning_details } = obj;
+console.log(obj);
 
 let wrong_node = document.getElementById('wrong');
 wrong_node.innerText = warning_mistake + " : " + warning_details;
@@ -33,16 +36,18 @@ const isAllZeroThreshold = (currentValue) => currentValue === '000000000000000';
 let not_zero = filterdData.filter((v, i) => !Object.values(v).every(isAllZeroThreshold));
 
 
-function check_undefined(value) {
-    if (value === undefined) {
-        console.log(filterdData[1]);
-        return filterdData[1];
-    }
-    return value;
-}
+// function check_undefined(value) {
+//     if (value === undefined) {
+//         console.log(filterdData[1]);
+//         return filterdData[1];
+//     }
+//     return value;
+// }
+
+console.log(not_zero[0]);
 
 
-for (var [key, val] of Object.entries(check_undefined(not_zero[0]))) {
+for (var [key, val] of Object.entries(not_zero[0])) {
     let formatedKey = key.slice(0, 3);
     let formatNum = parseInt(val, 10);
     var numb = formatedKey.trim();
@@ -58,7 +63,7 @@ for (var [key, val] of Object.entries(check_undefined(not_zero[0]))) {
     }
 
     function time_091(time) {
-        let val = time.slice(9, 13);
+        let val = time.slice(8, 12);
         const numb_split = val.split("");
         numb_split.splice(2, 0, ":");
         let join = numb_split.join("");
@@ -67,17 +72,17 @@ for (var [key, val] of Object.entries(check_undefined(not_zero[0]))) {
 
     if (isNumeric) {
         const node = document.getElementById(numb);
-        let numberWithDecimal = (formatNum / 100).toFixed(3);
+        let numberWithFormat = (formatNum / 100).toFixed(3);
         switch (numb) {
-            case "090":
-                numberWithDecimal = date_090(val);
+            case "090": numberWithFormat = date_090(val);
                 break;
-            case "091":
-                numberWithDecimal = time_091(val);
+            case "091": numberWithFormat = time_091(val);
+                break;
+            case "095": numberWithFormat = date_090(val);
             default:
                 break;
         }
-        const node_val = document.createTextNode(numberWithDecimal);
+        const node_val = document.createTextNode(numberWithFormat);
         node.appendChild(node_val);
     }
 }

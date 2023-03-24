@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input id="file_reader" type="file" onchange="imagesSelected" multiple accept=".gif,.jpg,.jpeg,.png" />
+
+    <script>
+        async function imagesSelected(event) {
+            let files = [...event.target.files];
+            let images = await Promise.all(files.map(f => { return readAsDataURL(f); }));
+            //all images' base64encoded data will be available as array in images
+        };
+
+        function readAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                let fileReader = new FileReader();
+                fileReader.onload = function () {
+                    console.log(fileReader.result)
+                    return resolve({ data: fileReader.result, name: file.name, size: file.size, type: file.type });
+                };
+                fileReader.readAsDataURL(file);
+            });
+        }  
+    </script>
+</body>
+
+
+
+</html>
